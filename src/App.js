@@ -13,10 +13,10 @@ function App() {
         <Unicafe />
         <Anecdotes />
         <CoursePart2 />
-        <ContactBook /> 
+        <CountriesMenu />
         */
       }
-      <CountriesMenu />
+      <ContactBook />
     </div>
   )
 }

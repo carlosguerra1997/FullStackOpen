@@ -16,9 +16,13 @@ export const CountriesMenu = () => {
     }, [])
 
     useEffect( () => {
-        const foundCountries = countries.filter( country => country.name.common.includes(searchedCountry) )
+        const foundCountries = countries.filter( country => country.name.common.toLowerCase().includes(searchedCountry.toLowerCase()) )
         setFoundCountry(foundCountries)
     }, [ countries, searchedCountry ])
+
+    const handleSubmit = e => {
+        e.preventDefault()
+    }
 
     const handleCountrySearch = e => {
         setSearchedCountry(e.target.value)
@@ -26,14 +30,14 @@ export const CountriesMenu = () => {
 
     return (
         <div>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <p>Find countries</p>
                 <input value={searchedCountry} onChange={handleCountrySearch} />
             </form>
             {
-                foundCountry.length === 0 || foundCountry.length > 10
+                foundCountry.length > 10
                     ? <p> Too many matches, specify another filter </p>
-                    : <Countries foundCountry={foundCountry} />
+                    : foundCountry.map( country => <Countries key={country.area} country={country} /> )
             }
         </div>
     )

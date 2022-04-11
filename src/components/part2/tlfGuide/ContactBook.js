@@ -1,23 +1,26 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
+
+import { addNewContact, getContacts, updateContact } from "./services/Contacts"
 
 import { Contact } from "./Contact"
 import { ContactFilter } from "./ContactFilter"
 import { ContactForm } from "./ContactForm"
+import { SuccessMessage } from "./SuccessMessage"
 
-export const ContactBook = () => {
-    useEffect( () => {
-        axios.get('http://localhost:3001/contacts').then( response => {
-        setContacts(response.data)
-        setContactsFilter(response.data)
-        })
-    }, [])
-    
+export const ContactBook = () => {    
     const [ contacts, setContacts ] = useState([])
-    const [ addContact, setAddContact ] = useState('')
-    const [ addNumber, setNumber ] = useState(0)
     const [ filterContact, setFilterContact ] = useState('')
     const [ contactFilter, setContactsFilter ] = useState([])
+    const [ success, setSuccess ] = useState(false)
+    const [ newContact, setNewContact ] = useState({ name: '', number: 0 })
+    const { name, number } = newContact
+
+    useEffect( () => {
+        const phoneBookContacts = getContacts().then( data => {
+            setContacts(data)
+            setContactsFilter(data)
+        })
+    }, [ newContact ])
 
     const handleFilter = e => {
         setFilterContact( e.target.value )
@@ -27,36 +30,48 @@ export const ContactBook = () => {
 
     const handleAddContact = e => {
         e.preventDefault()
-        const contactExist = contacts.filter( contact => contact.name === addContact )
-        if (contactExist.length) return alert(`${addContact} is already added to the phonebook`)
-        setContacts([ ...contacts, { name: addContact, number: addNumber } ])
-        setContactsFilter([ ...contacts, { name: addContact, number: addNumber } ])
+        const contactExist = contacts.filter( contact => contact.name === name )
+        if (contactExist.length) {
+            const response = window.confirm(`${newContact.name} is already added to phonebook, replace the old number with a new one?`)
+            if ( response ) {
+                console.log(contactExist[0].id)
+                updateContact(contactExist[0].id, newContact)
+            }
+        } else {
+            addNewContact(newContact)
+        }
+        setSuccess(true)
+        setTimeout( () => {
+            setSuccess(false)
+        }, 3000)
+        setNewContact({ name: '', number: 0 })
     }
 
-    const handleChangeContact = e => {
-        setAddContact(e.target.value)
-    }
-
-    const handleChangeNumber = e => {
-        setNumber(e.target.value)
+    const handleChange = e => {
+        setNewContact({
+            ...newContact,
+            [e.target.name]: e.target.value
+        })
     }
 
     return (
         <>
             <h2> Phonebook </h2>
+            {
+                success && <SuccessMessage newContact={newContact} />
+            }
             <ContactFilter 
                 filterContact={filterContact}
                 handleFilter={handleFilter}
             />
             <ContactForm 
-                addContact={addContact}
-                addNumber={addNumber}
+                name={name}
+                number={number}
                 handleAddContact={handleAddContact}
-                handleChangeContact={handleChangeContact}
-                handleChangeNumber={handleChangeNumber}
+                handleChange={handleChange}
             />
             <h2> Numbers </h2>
-            { contactFilter.length && contactFilter.map( contact => <Contact key={contact.name} contact={contact} /> ) }
+            { contactFilter.length && contactFilter.map( contact => <Contact key={contact.name} contact={contact} setContacts={setContacts} setContactsFilter={setContactsFilter} setSuccess={setSuccess} /> ) }
         </>
     )
 }

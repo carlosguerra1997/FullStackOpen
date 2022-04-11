@@ -1,26 +1,37 @@
-import { Country } from "./Country"
+import { apiRoutes } from "./api/apiRoutes"
+import axios from "axios"
+import { useState } from "react"
 
-export const Countries = ({ foundCountry }) => {
+import { Country } from './Country'
 
-    console.log( 'Found: ', foundCountry )
+export const Countries = ({ country }) => {
+    const [ countryInfo, setCountryInfo ] = useState({})
+    const [ weatherInfo, setWeatherInfo ] = useState({})
+    const { name: { common }, capital } = country
+
+    
+
+    const handleShowCountry = async () => {
+        const { data } = await axios.get(apiRoutes.countryByName.replace('{name}', common))
+        setCountryInfo(data[0])
+        const weather = await axios.get(apiRoutes.currentWeather.replace('{apiKey}', '0715b21dde00c80d8307a9630dbeb9a8').replace('{name}', capital[0]))
+        setWeatherInfo(weather)
+    }
 
     return (
-        <div>
-            {
-                foundCountry.length > 1 
-                ? foundCountry.map( country => <Country key={country.area} country={country} />)
-                : 
-                    <>
-                        <h1>{ foundCountry[0]?.name.common }</h1>
-                        <p>Capital: { foundCountry[0]?.capital[0] }</p>
-                        <p>Population: { foundCountry[0]?.population }</p>
-                        <h3>Languages</h3>
-                        <ul>
-                            
-                        </ul>
-                        <img src={foundCountry[0]?.flags.png} alt='Country flag' />
-                    </>
-            }
-        </div>
+        <>  {
+                Object.keys(countryInfo).length === 0 ?
+                    <div>
+                        <p> {common} </p>
+                        <button type='button'  onClick={handleShowCountry}> Show </button>
+                    </div> :
+                    <div>
+                        {
+                            Object.keys(countryInfo) != 0 &&
+                            <Country countryInfo={countryInfo} weatherInfo={weatherInfo} />
+                        }
+                    </div>
+            }   
+        </>
     )
 }

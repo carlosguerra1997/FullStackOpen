@@ -1,15 +1,15 @@
-export const ContactForm = ({ addContact, addNumber, handleAddContact, handleChangeContact, handleChangeNumber }) => {
+export const ContactForm = ({ name, number, handleAddContact, handleChange }) => {
     return (
         <>
             <form onSubmit={handleAddContact}>
                     <h2> Add new </h2>
                     <div>
                         <p>Name:</p>
-                        <input value={addContact} onChange={handleChangeContact} />
+                        <input id={name} name="name" value={name} onChange={handleChange} />
                     </div>
                     <div>
                         <p>Number:</p>
-                        <input value={addNumber} onChange={handleChangeNumber} />
+                        <input id={number} name="number" value={number} onChange={handleChange} />
                     </div>
                     <div>
                         <button type='submit'> Add Contact </button>
